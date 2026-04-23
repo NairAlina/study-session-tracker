@@ -26,12 +26,14 @@ public class SessionManager {
         return sessions;
     }
 
-    public int getTotalTime() {
-        int total = 0;
+    public String getTotalTimeFormatted() {
+        int totalSeconds = 0;
         for (StudySession session : sessions) {
-            total += session.getDuration();
+            totalSeconds += session.getDurationSeconds();
         }
-        return total;
+        int mins = totalSeconds / 60;
+        int secs = totalSeconds % 60;
+        return String.format("%02d:%02d", mins, secs);
     }
     
     public void deleteSession(int index) {
@@ -55,8 +57,9 @@ public class SessionManager {
         if (file.exists()) {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
                 sessions = (List<StudySession>) ois.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error loading sessions: " + e.getMessage());
+            } catch (Exception e) {
+                // If serialVersionUID changed or format invalid, start fresh
+                System.err.println("Error loading sessions or incompatible version: " + e.getMessage());
                 sessions = new ArrayList<>();
             }
         }
